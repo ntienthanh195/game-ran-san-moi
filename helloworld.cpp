@@ -14,29 +14,33 @@ void ve_tuong_trai();
 void ve_tuong();
 void khoi_tao_ran(int toadox[], int toadoy[]);
 void ve_ran(int toadox[], int toadoy[]);
-void xu_ly_ran(int toadox[], int toadoy[], int x, int y);
+void xu_ly_ran(int toadox[], int toadoy[], int x, int y,int &xqua, int &yqua);
 bool kt_ran_cham_tuong(int x0, int y0);
 bool kt_ran_cham_duoi(int toadox[], int toadoy[]);
-void tao_qua(int &xqua, int &yqua);
+void tao_qua(int &xqua, int &yqua, int toadox[],int toadoy[]);
+bool kt_ran_de_qua(int xqua, int yqua, int toadox[], int toadoy[]);
+bool kt_ran_an_qua(int xqua, int yqua, int x0, int y0);
 
 
 int main()
 {
-    srand(time(NULL));
-    int xqua=0,yqua=0;
-    tao_qua(xqua,yqua);
-
-
     bool gameover = false;
     int toadox[100], toadoy[100];
+
     ve_tuong();
+
     khoi_tao_ran(toadox, toadoy);
     ve_ran(toadox, toadoy);
+
+    srand(time(NULL));
+    int xqua=0,yqua=0;
+    tao_qua(xqua,yqua,toadox,toadoy);
+
     int x = 50, y = 13;
     GotoXY(x, y);
     int l = 1;
     TextColor(l);
-    int check = 2;
+    int check = 3;
     ShowCur(0);
     while (gameover == false)
     {
@@ -88,7 +92,7 @@ int main()
             x = 11;
             check = 3;
         }
-        xu_ly_ran(toadox, toadoy, x, y);
+        xu_ly_ran(toadox, toadoy, x, y,xqua,yqua);
         //======= kiem tra ======
         
         if (kt_ran_cham_tuong(toadox[0], toadoy[0]) == true || kt_ran_cham_duoi(toadox, toadoy) == true)
@@ -190,53 +194,43 @@ void ve_ran(int toadox[], int toadoy[])
     }
 }
 
-void xu_ly_ran(int toadox[], int toadoy[], int x, int y)
+
+   
+    
+void xu_ly_ran(int toadox[], int toadoy[], int x, int y, int &xqua, int &yqua)
 {
-    // b1: xóa tọa độ cuối cùng
-    GotoXY(toadox[sl - 1], toadoy[sl - 1]);
-    cout << " ";
-    // b2: thêm tọa độ mới vào đầu rắn
+    // B1: KIỂM TRA ĂN QUẢ (Kiểm tra đầu mới x,y với quả)
+    if (kt_ran_an_qua(xqua, yqua, x, y) == true)
+    {
+        // === TRƯỜNG HỢP ĂN TÁO ===
+        sl++; // Tăng dài
+        tao_qua(xqua, yqua, toadox, toadoy); // Tạo quả mới
+    }
+    else
+    {
+        // === TRƯỜNG HỢP KHÔNG ĂN ===
+        // QUAN TRỌNG: Phải xóa đuôi TRƯỚC KHI dịch chuyển mảng
+        GotoXY(toadox[sl - 1], toadoy[sl - 1]);
+        cout << " ";
+    }
+
+    // B2: Dịch chuyển thân rắn (Sau khi đã xóa đuôi xong xuôi)
     for (int i = sl - 1; i > 0; i--)
     {
         toadox[i] = toadox[i - 1];
         toadoy[i] = toadoy[i - 1];
     }
 
-    // b3: Cập nhật ví trí - vẽ rắn
+    // B3: Cập nhật đầu mới
     toadox[0] = x;
     toadoy[0] = y;
+
+    // B4: Vẽ lại rắn
+    // Đặt lại màu xanh cho rắn (nếu muốn)
+    //TextColor(2); 
     ve_ran(toadox, toadoy);
 }
 
-/*
-void xu_ly_ran(int toadox[], int toadoy[], int x, int y)
-{
-    // B1: Xóa đuôi cũ
-    GotoXY(toadox[sl-1], toadoy[sl-1]);
-    cout << " ";
-
-    // B2: Dịch chuyển dữ liệu trong mảng
-    for(int i = sl-1; i > 0; i--)
-    {
-        toadox[i] = toadox[i-1];
-        toadoy[i] = toadoy[i-1];
-    }
-
-    // B3: Cập nhật tọa độ đầu mới
-    toadox[0] = x;
-    toadoy[0] = y;
-
-    // B4: VẼ TỐI ƯU
-
-    // Vẽ đầu mới
-    GotoXY(toadox[0], toadoy[0]);
-    cout << "0";
-
-    // Biến cái đầu cũ (giờ là đốt thứ 1) thành thân
-    GotoXY(toadox[1], toadoy[1]);
-    cout << "o";
-}
-*/
 
 bool kt_ran_cham_tuong(int x0, int y0)
 {
@@ -273,15 +267,43 @@ bool kt_ran_cham_duoi(int toadox[], int toadoy[])
 }
 
 
-void tao_qua(int &xqua, int &yqua)
+void tao_qua(int &xqua, int &yqua,int toadox[],int toadoy[])
 {
-    // Tính toán độ rộng x: Tường từ 10-100 thì táo từ 11-99
-    xqua = rand() % (99 - 11 + 1) + 11;
-    
-    // Tính toán độ rộng y: Tường từ 5-28 thì táo từ 6-27
-    yqua = rand() % (27 - 6 + 1) + 6;
+  
     
     // Vẽ quả ra màn hình
+    do
+    {
+        // Tính toán độ rộng x: Tường từ 10-100 thì táo từ 11-99
+        xqua = rand() % (99 - 11 + 1) + 11;
+        yqua = rand() % (27 - 6 + 1) + 6;
+        // Tính toán độ rộng y: Tường từ 5-28 thì táo từ 6-27 
+    } while (kt_ran_de_qua(xqua,yqua,toadox,toadoy)==true);
+    int mau = rand() % (15 - 9 + 1) + 9;
+    TextColor(mau);
     GotoXY(xqua, yqua);
     cout << "$"; 
+    TextColor(7);
 }
+
+bool kt_ran_de_qua(int xqua, int yqua, int toadox[], int toadoy[])
+{
+    for(int i=0;i<sl;i++)
+    {
+        if((xqua == toadox[i]) && (yqua == toadoy[i]))
+        {
+            return true; 
+        }
+    }
+    return false;
+}
+
+
+bool kt_ran_an_qua(int xqua, int yqua, int x0, int y0)
+{   if((xqua ==x0) && (yqua ==y0))
+    {
+        return true; 
+    }
+    return false;
+}
+ 
