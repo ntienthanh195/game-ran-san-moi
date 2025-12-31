@@ -4,6 +4,8 @@
 #include <string>
 #include <ctime>
 #include <windows.h>
+#include <vector>
+#include <fstream> 
 
 int sl = 7;
 using namespace std;
@@ -21,33 +23,100 @@ bool kt_ran_cham_duoi(int toadox[], int toadoy[]);
 void tao_qua(int &xqua, int &yqua, int toadox[], int toadoy[]);
 bool kt_ran_de_qua(int xqua, int yqua, int toadox[], int toadoy[]);
 bool kt_ran_an_qua(int xqua, int yqua, int x0, int y0);
+void SaveGame(int toadox[], int toadoy[], int &xqua, int &yqua, int &diem, int &tocdo, int &sl);
+bool TaiGame(int toadox[], int toadoy[], int &xqua, int &yqua, int &diem, int &tocdo, int &sl);
+
 
 int main()
 {
-    int diem = 0;
+
     SetConsoleOutputCP(437);
-    bool gameover = false;
-    int toadox[100], toadoy[100];
-
-    ve_tuong();
-
-    khoi_tao_ran(toadox, toadoy);
-    ve_ran(toadox, toadoy);
-
     srand(time(NULL));
-    int xqua = 0, yqua = 0;
-    tao_qua(xqua, yqua, toadox, toadoy);
-
-    // TỐC ĐỘ VÀ ĐỒNG HỒ
-    int tocdo = 200;                // 200ms (0.2 giây) một bước
-    clock_t thoi_gian_cu = clock(); // Bấm giờ mốc thời gian bắt đầu
+    ShowCur(0);
 
     int x = 50, y = 13;
-    GotoXY(x, y);
-    int l = 1;
-    TextColor(l);
+    int diem = 0;
+    bool gameover = false;
+    int toadox[100], toadoy[100];
+    int tocdo = 200; 
     int check = -1;
-    ShowCur(0);
+    int l = 1;
+    int xqua = 0, yqua = 0;
+
+    while(true)
+    {
+        system("cls");
+        TextColor(11);
+        cout << "\n\n\t\t===== GAME RAN SAN MOI =====";
+        cout << "\n\t1. Choi moi (New Game)";
+        cout << "\n\t2. Tiep tuc (Continue)";
+        cout << "\n\t0. Thoat";
+        cout << "\n\n\tLua chon: ";
+        TextColor(7);
+        char luachon = _getch(); // Dùng getch để không cần ấn Enter
+
+        if(luachon =='1')
+        {
+            sl=7;
+            diem=0;
+            tocdo=200;
+            check=-1;
+            khoi_tao_ran(toadox, toadoy);
+            tao_qua(xqua, yqua, toadox, toadoy);
+            break;
+        }
+        else if(luachon =='2')
+        {
+            if(TaiGame(toadox, toadoy, xqua, yqua, diem, tocdo, sl))
+            {
+
+                break;
+            }
+            else
+            {
+                cout<<"\n\n\t =====KHONG TIM THAY FILE SAVE!=====";
+                Sleep(1000);
+            }
+
+
+        }
+        else if(luachon =='0')
+        {
+            return 0;
+        }
+    }
+    
+    // --- VÀO GAME ---
+    system("cls");
+    ve_tuong();
+    
+    // Vẽ lại rắn
+    TextColor(10);
+    ve_ran(toadox, toadoy);
+    
+    // Vẽ quả táo (vẽ lại vì system cls đã xóa)
+    int mau_qua = rand() % (15 - 9 + 1) + 9;
+    TextColor(mau_qua);
+    GotoXY(xqua, yqua); cout << "$";
+    TextColor(7);
+    
+    
+    // Vẽ thông tin
+    GotoXY(0, 0); cout << "Diem: " << diem;
+
+    GotoXY(0, 2);  cout << "Nhan 'x' de Save & Exit";
+
+    
+
+    clock_t thoi_gian_cu = clock(); // Bấm giờ mốc thời gian bắt đầu
+
+    x = toadox[0];
+    y = toadoy[0];
+    
+
+    vector<int> huong_di;
+    
+    
     while (gameover == false)
     {
 
@@ -57,21 +126,46 @@ int main()
         if (_kbhit())
         {
             char kitu = _getch();
+            if(kitu == 'x')
+            {
+                SaveGame(toadox, toadoy, xqua, yqua, diem, tocdo, sl);
+                system("cls");
+                GotoXY(50, 14); cout << "GAME SAVED! BYE BYE!";
+                return 0; // Thoát game
+            }
             if (kitu == -32)
             {
                 kitu = _getch();
-                if (kitu == 72 && check != 0)
-                    check = 1;
-                else if (kitu == 80 && check != 1)
-                    check = 0;
-                else if (kitu == 75 && check != 3)
-                    check = 2;
-                else if (kitu == 77 && check != 2)
-                    check = 3;
+
+                int huong_tam=-1; 
+              
+                int huong_du_tinh= (huong_di.empty()==true) ? check : huong_di.back();
+                
+
+                if (kitu == 72 && huong_du_tinh != 0) //Muốn LÊN (1), kỵ XUỐNG (0)
+                    huong_tam = 1;
+                else if (kitu == 80 && huong_du_tinh != 1) // Muốn XUỐNG (0), kỵ LÊN (1)
+                    huong_tam = 0;
+                else if (kitu == 75 && huong_du_tinh != 3) // Muốn TRÁI (2), kỵ PHẢI (3)
+                    huong_tam = 2;
+                else if (kitu == 77 && huong_du_tinh != 2) // Muốn PHẢI (3), kỵ TRÁI (2)
+                    huong_tam = 3;
+
+                if(huong_tam != -1 && huong_di.size() <2 )
+                {
+                    huong_di.push_back(huong_tam);
+                }
             }
         }
         if (clock() - thoi_gian_cu >= tocdo)
         {
+
+            if(huong_di.empty() == false)
+            {
+                check= huong_di.front();
+                huong_di.erase(huong_di.begin());
+            }
+
 
             if (check != -1)
             {
@@ -83,27 +177,7 @@ int main()
                     x--; // 2 cham vao bien phai - di qua trai
                 else if (check == 3)
                     x++; // 3 cham vao ben trai - di qua phai (tuc la 100)
-
-                if (y >= 27) // cham bien thi di len
-                {
-                    y = 27;
-                    check = 1;
-                }
-                else if (y <= 6) // cham tren thi di xuong
-                {
-                    y = 6;
-                    check = 0;
-                }
-                else if (x >= 100) // cham phai thi qua trai
-                {
-                    x = 100;
-                    check = 2;
-                }
-                else if (x <= 11) // cham trai thi qua phai
-                {
-                    x = 11;
-                    check = 3;
-                }
+            
                 xu_ly_ran(toadox, toadoy, x, y, xqua, yqua, diem, tocdo);
             }
             if (kt_ran_cham_tuong(toadox[0], toadoy[0]) == true || kt_ran_cham_duoi(toadox, toadoy) == true)
@@ -124,7 +198,7 @@ int main()
 
                 // 4. Dùng lệnh này thay cho system("pause")
                 _getch(); // Đợi người chơi bấm 1 phím bất kỳ thì mới tắt, KHÔNG hiện chữ rác
-
+                remove("save.txt");
                 break;
             }
             thoi_gian_cu = clock();
@@ -232,16 +306,17 @@ void khoi_tao_ran(int toadox[], int toadoy[])
 
 void ve_ran(int toadox[], int toadoy[])
 {
+    TextColor(10);
     for (int i = 0; i < sl; i++)
     {
         GotoXY(toadox[i], toadoy[i]);
         if (i == 0)
         {
-            cout << "0";
+            cout << char(1);
         }
         else
         {
-            cout << "o";
+            cout << char(9);
         }
     }
 }
@@ -373,4 +448,36 @@ bool kt_ran_an_qua(int xqua, int yqua, int x0, int y0)
         return true;
     }
     return false;
+}
+
+
+void SaveGame(int toadox[], int toadoy[], int &xqua, int &yqua, int &diem, int &tocdo, int &sl)
+{
+    ofstream f;
+    f.open("save.txt");
+    f << diem << " " << tocdo << " " << sl << " " << xqua << " " << yqua << " "  << endl;
+
+    for(int i=0;i<sl;i++)
+    {
+        f << toadox[i] <<" " << toadoy[i]<<endl;
+    }
+    f.close();
+
+}
+
+bool TaiGame(int toadox[], int toadoy[], int &xqua, int &yqua, int &diem, int &tocdo, int &sl)
+{
+    ifstream f;
+    f.open("save.txt");
+
+    if(!f) return false;
+
+    f >> diem >> tocdo >> sl >> xqua >> yqua;
+
+    for(int i=0;i<sl;i++)
+    {
+        f >> toadox[i] >> toadoy[i];
+    }
+    f.close();
+    return true;
 }
