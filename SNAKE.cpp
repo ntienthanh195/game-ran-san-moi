@@ -1,5 +1,5 @@
 #include <iostream>
-#include "SANKE.h"
+#include "SNAKE.h"
 #include <conio.h>
 #include <string>
 #include <ctime>
@@ -27,6 +27,100 @@ void SaveGame(int toadox[], int toadoy[], int &xqua, int &yqua, int &diem, int &
 bool TaiGame(int toadox[], int toadoy[], int &xqua, int &yqua, int &diem, int &tocdo, int &sl);
 
 
+void ve_nut(int x,int y,char chu)
+{
+   
+    GotoXY(x,y); cout << char(218) << char(196) << char(196) << char(196) << char(191);
+    GotoXY(x, y + 1); cout << char(179) << " " << chu << " " <<char(179);     
+    GotoXY(x, y + 2); cout << char(192) << char(196) << char(196) << char(196) << char(217);
+}
+/*
+void VeNutControl(int x, int y, string chu, int mau)
+{
+    TextColor(mau); // Đặt màu (14: Vàng, 7: Trắng)
+    GotoXY(x, y);     cout << char(218) << char(196) << char(196) << char(196) << char(191); // Nắp trên
+    GotoXY(x, y + 1); cout << char(179) << " " << chu << " " << char(179);                 // Thân
+    GotoXY(x, y + 2); cout << char(192) << char(196) << char(196) << char(196) << char(217); // Đáy dưới
+    TextColor(7); // Trả lại màu trắng để không ảnh hưởng cái khác
+}
+*/
+
+void ve_sang(int phim,int &sang)
+{
+	if(phim == 1)  //lên
+    {
+        TextColor(228);
+        GotoXY(116,7);
+        cout<<" W "; 
+        sang=1;
+        TextColor(7);
+    }
+    
+    if(phim == 0)  
+    {
+        TextColor(228);
+        GotoXY(116,11); 
+        cout<<" S ";
+        sang=1;
+        TextColor(7);
+    }
+    
+    if(phim == 2)  
+    {
+        TextColor(228);
+        GotoXY(111,11); 
+        cout<<" A ";
+        sang=1;
+        TextColor(7);
+    }
+    
+    if(phim == 3)  
+    {
+        TextColor(228);
+        GotoXY(121,11); 
+        cout<<" D ";
+        sang=1;
+        TextColor(7);
+    }
+        
+    
+}
+
+void ve_toi(int phim)
+{
+	if(phim == 1)  //lên
+    {
+        TextColor(7);
+        GotoXY(116,7);
+        cout<<" W ";   
+    }
+    
+    if(phim == 0)  
+    {
+        TextColor(7);
+        GotoXY(116,11); 
+        cout<<" S ";
+        TextColor(7);
+    }
+    
+    if(phim == 2)  
+    {
+        TextColor(7);
+        GotoXY(111,11); 
+        cout<<" A ";
+        
+    }
+    
+    if(phim == 3)  
+    {
+        TextColor(7);
+        GotoXY(121,11); 
+        cout<<" D ";
+    }
+        
+    
+}
+
 int main()
 {
 
@@ -42,6 +136,10 @@ int main()
     int check = -1;
     int l = 1;
     int xqua = 0, yqua = 0;
+    int sang=0;
+    
+    int phim_sang=-1;
+    clock_t thoi_gian_tat_den =0;
 
     while(true)
     {
@@ -89,9 +187,13 @@ int main()
     // --- VÀO GAME ---
     system("cls");
     ve_tuong();
+    ve_nut(110,10,'A');
+    ve_nut(115,10,'S');
+    ve_nut(120,10,'D');
+    ve_nut(115,6,'W');
     
     // Vẽ lại rắn
-    TextColor(10);
+    TextColor(11);
     ve_ran(toadox, toadoy);
     
     // Vẽ quả táo (vẽ lại vì system cls đã xóa)
@@ -153,10 +255,20 @@ int main()
 
                 if(huong_tam != -1 && huong_di.size() <2 )
                 {
-                    huong_di.push_back(huong_tam);
+                    huong_di.push_back(huong_tam);              
                 }
             }
         }
+
+        if(phim_sang != -1)
+        {
+            if(clock() >= thoi_gian_tat_den)
+            {
+                ve_toi(phim_sang);
+                phim_sang=-1;
+            }
+        }
+
         if (clock() - thoi_gian_cu >= tocdo)
         {
 
@@ -164,9 +276,16 @@ int main()
             {
                 check= huong_di.front();
                 huong_di.erase(huong_di.begin());
+                if (phim_sang != -1) ve_toi(phim_sang);
+                ve_sang(check, sang);
+                phim_sang = check;
+                thoi_gian_tat_den = clock() + 150;
             }
 
-
+            
+                
+            
+           
             if (check != -1)
             {
                 if (check == 0)
@@ -212,6 +331,7 @@ int main()
 
             
         }
+        
         Sleep(1);
     }
  
@@ -312,11 +432,11 @@ void ve_ran(int toadox[], int toadoy[])
         GotoXY(toadox[i], toadoy[i]);
         if (i == 0)
         {
-            cout << char(1);
+            cout << "0";
         }
         else
         {
-            cout << char(9);
+            cout << "o";
         }
     }
 }
