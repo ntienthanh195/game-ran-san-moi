@@ -7,7 +7,7 @@
 #include <vector>
 #include <fstream> 
 
-int sl = 7;
+int sl=7;
 using namespace std;
 
 void ve_tuong_tren();
@@ -23,166 +23,199 @@ bool kt_ran_cham_duoi(int toadox[], int toadoy[]);
 void tao_qua(int &xqua, int &yqua, int toadox[], int toadoy[]);
 bool kt_ran_de_qua(int xqua, int yqua, int toadox[], int toadoy[]);
 bool kt_ran_an_qua(int xqua, int yqua, int x0, int y0);
-void SaveGame(int toadox[], int toadoy[], int &xqua, int &yqua, int &diem, int &tocdo, int &sl);
-bool TaiGame(int toadox[], int toadoy[], int &xqua, int &yqua, int &diem, int &tocdo, int &sl);
+void SaveGame(string ten_file, int toadox[], int toadoy[], int xqua, int yqua, int diem, int tocdo, int sl);
+bool TaiGame(string ten_file, int toadox[], int toadoy[], int &xqua, int &yqua, int &diem, int &tocdo, int &sl);
+void ve_nut(int x,int y,char chu);
+void ve_sang(int phim,int &sang);
+void ve_toi(int phim);
 
 
-void ve_nut(int x,int y,char chu)
+void CheDo_1_CoDien();    
+void CheDo_2_XuyenTuong();  
+void CheDo_3_VatCan();      
+void CheDo_4_DauTruong();
+
+int HienThiMenu()
 {
-   
-    GotoXY(x,y); cout << char(218) << char(196) << char(196) << char(196) << char(191);
-    GotoXY(x, y + 1); cout << char(179) << " " << chu << " " <<char(179);     
-    GotoXY(x, y + 2); cout << char(192) << char(196) << char(196) << char(196) << char(217);
-}
-/*
-void VeNutControl(int x, int y, string chu, int mau)
-{
-    TextColor(mau); // Đặt màu (14: Vàng, 7: Trắng)
-    GotoXY(x, y);     cout << char(218) << char(196) << char(196) << char(196) << char(191); // Nắp trên
-    GotoXY(x, y + 1); cout << char(179) << " " << chu << " " << char(179);                 // Thân
-    GotoXY(x, y + 2); cout << char(192) << char(196) << char(196) << char(196) << char(217); // Đáy dưới
-    TextColor(7); // Trả lại màu trắng để không ảnh hưởng cái khác
-}
-*/
+    string cac_muc[] = {
+    "1. CO DIEN (CLASSIC)",       // Dòng đầu tiên -> Máy gán vào ô số [0]
+    "2. XUYEN TUONG (NO WALL)",   // Dòng thứ 2   -> Máy gán vào ô số [1]
+    "3. VAT CAN (OBSTACLES)",     // Dòng thứ 3   -> Máy gán vào ô số [2]
+    "4. DAU TRUONG (PVP 2 SNAKES)", // Dòng thứ 4 -> Máy gán vào ô số [3]
+    "5. THOAT GAME",              // Dòng thứ 5   -> Máy gán vào ô số [4]
 
-void ve_sang(int phim,int &sang)
-{
-	if(phim == 1)  //lên
-    {
-        TextColor(228);
-        GotoXY(116,7);
-        cout<<" W "; 
-        sang=1;
-        TextColor(7);
-    }
-    
-    if(phim == 0)  
-    {
-        TextColor(228);
-        GotoXY(116,11); 
-        cout<<" S ";
-        sang=1;
-        TextColor(7);
-    }
-    
-    if(phim == 2)  
-    {
-        TextColor(228);
-        GotoXY(111,11); 
-        cout<<" A ";
-        sang=1;
-        TextColor(7);
-    }
-    
-    if(phim == 3)  
-    {
-        TextColor(228);
-        GotoXY(121,11); 
-        cout<<" D ";
-        sang=1;
-        TextColor(7);
-    }
-        
-    
-}
-
-void ve_toi(int phim)
-{
-	if(phim == 1)  //lên
-    {
-        TextColor(7);
-        GotoXY(116,7);
-        cout<<" W ";   
-    }
-    
-    if(phim == 0)  
-    {
-        TextColor(7);
-        GotoXY(116,11); 
-        cout<<" S ";
-        TextColor(7);
-    }
-    
-    if(phim == 2)  
-    {
-        TextColor(7);
-        GotoXY(111,11); 
-        cout<<" A ";
-        
-    }
-    
-    if(phim == 3)  
-    {
-        TextColor(7);
-        GotoXY(121,11); 
-        cout<<" D ";
-    }
-        
-    
-}
-
-int main()
-{
-
-    SetConsoleOutputCP(437);
-    srand(time(NULL));
-    ShowCur(0);
-
-    int x = 50, y = 13;
-    int diem = 0;
-    bool gameover = false;
-    int toadox[100], toadoy[100];
-    int tocdo = 200; 
-    int check = -1;
-    int l = 1;
-    int xqua = 0, yqua = 0;
-    int sang=0;
-    
-    int phim_sang=-1;
-    clock_t thoi_gian_tat_den =0;
-
+}; 
+    int so_luong_cac_muc=5;
+    int muc_dang_chon=0; 
     while(true)
     {
         system("cls");
         TextColor(11);
         cout << "\n\n\t\t===== GAME RAN SAN MOI =====";
-        cout << "\n\t1. Choi moi (New Game)";
-        cout << "\n\t2. Tiep tuc (Continue)";
-        cout << "\n\t0. Thoat";
-        cout << "\n\n\tLua chon: ";
-        TextColor(7);
-        char luachon = _getch(); // Dùng getch để không cần ấn Enter
-
-        if(luachon =='1')
+        cout<<"\n\t\t   (Dung phim len xuong de chon) \n\n";
+       
+        for(int i=0;i<so_luong_cac_muc;i++)
         {
-            sl=7;
-            diem=0;
-            tocdo=200;
-            check=-1;
-            khoi_tao_ran(toadox, toadoy);
-            tao_qua(xqua, yqua, toadox, toadoy);
-            break;
-        }
-        else if(luachon =='2')
-        {
-            if(TaiGame(toadox, toadoy, xqua, yqua, diem, tocdo, sl))
+            if(i==muc_dang_chon)
             {
-
-                break;
+                TextColor(224);
+                cout<<"\n"<< cac_muc[muc_dang_chon];
+                TextColor(7);
             }
             else
             {
-                cout<<"\n\n\t =====KHONG TIM THAY FILE SAVE!=====";
-                Sleep(1000);
+                TextColor(7);
+                cout<<"\n"<< cac_muc[i];
             }
-
-
         }
-        else if(luachon =='0')
-        {
-            return 0;
-        }
+
+        
+        
+            char kitu= _getch();
+            if(kitu == -32)
+            {
+                kitu = _getch();
+                if(kitu == 72)
+                {
+                    muc_dang_chon--;
+                    if(muc_dang_chon<0) 
+                    {
+                        muc_dang_chon=so_luong_cac_muc-1;
+                    }
+                    
+                }
+                else if(kitu == 80)
+                {
+                    muc_dang_chon++;
+                    if(muc_dang_chon>=so_luong_cac_muc)
+                    {
+                        muc_dang_chon=0;
+                    }
+                }
+                  
+                }
+                 else if(kitu == 13) 
+                {
+                    if(muc_dang_chon == 5) return 0;
+                    return muc_dang_chon+1;
+                }
+        else if(kitu == '1') return 1;
+        else if(kitu == '2') return 2;
+        else if(kitu == '3') return 3;
+        else if(kitu == '4') return 4;
+        else if(kitu == '5') return 0;
+
+            }
     }
+     
+
+
+
+
+int main()
+{
+    SetConsoleOutputCP(437);
+    srand(time(NULL));
+    ShowCur(0);
+
+    while(true)
+    {
+        int luachon = HienThiMenu();
+        switch(luachon)
+        {
+          case 1: 
+          {
+            CheDo_1_CoDien();
+            break;
+          }
+          case 2: 
+          {
+            
+            break;
+          }
+          case 3: 
+          {
+            
+            break;
+          }
+          case 4: 
+          {
+            
+            break;
+          }
+          case 0: 
+          {
+            return 0;
+          }
+
+
+          }
+    }
+}
+
+
+
+void CheDo_1_CoDien()
+{
+    int diem, tocdo, l, xqua, yqua;
+    int check=-1;
+    int toadox[100], toadoy[100];
+    int x, y;
+
+   while(true)
+   {
+      system("cls");
+      TextColor(11);
+      cout<<"\n1. Choi moi(New Game)";
+      cout<<"\n2. Tiep tuc(Continue)";
+      cout<<"\n0. Thoat(Exit)";
+      cout<<"\n\n\tLua chon cua ban: ";
+      char luachon=_getch();
+      if(luachon == '1')
+      {
+        sl=7;
+        diem =0;
+        tocdo=200;
+        check=-1;
+        khoi_tao_ran(toadox, toadoy);
+        tao_qua(xqua, yqua, toadox, toadoy);
+        break;
+      }
+      else if(luachon == '2')
+      {
+        if(TaiGame("savegame1.txt",toadox, toadoy, xqua, yqua, diem, tocdo, sl))
+        {
+            break;
+        }
+        else 
+        {
+            TextColor(12);
+            cout<<"\n\n\t =====KHONG TIM THAY FILE SAVE!=====";
+            Sleep(1000);
+            continue;
+        } 
+      }
+      else if(luachon == '0')
+      {
+        return ;
+      }
+
+   }
+
+
+    
+    
+    bool gameover =false;
+    
+
+    
+    l = 1;
+    int sang=0;
+    
+    int phim_sang=-1;
+    clock_t thoi_gian_tat_den =0;
+
+
     
     // --- VÀO GAME ---
     system("cls");
@@ -217,12 +250,17 @@ int main()
     
 
     vector<int> huong_di;
+
+    
+
     
     
     while (gameover == false)
     {
+        
 
-        GotoXY(0, 0);
+
+        GotoXY(0,0);
 
         // bảng điều khiển
         if (_kbhit())
@@ -230,10 +268,10 @@ int main()
             char kitu = _getch();
             if(kitu == 'x')
             {
-                SaveGame(toadox, toadoy, xqua, yqua, diem, tocdo, sl);
+                SaveGame("savegame1.txt",toadox, toadoy, xqua, yqua, diem, tocdo, sl);
                 system("cls");
-                GotoXY(50, 14); cout << "GAME SAVED! BYE BYE!";
-                return 0; // Thoát game
+                GotoXY(50, 14); cout << "GAME SAVED!";
+                return ; // Thoát game
             }
             if (kitu == -32)
             {
@@ -310,7 +348,7 @@ int main()
 
                 // 2. In hướng dẫn thoát
                 GotoXY(45, 15);
-                cout << "Nhan phim bat ky de thoat...";
+                cout << "Nhan phim bat ky de quay lai MENU";
 
                 // 3. Đưa con trỏ ra chỗ khuất (để không nhấp nháy xấu màn hình)
                 GotoXY(0, 35);
@@ -318,7 +356,7 @@ int main()
                 // 4. Dùng lệnh này thay cho system("pause")
                 _getch(); // Đợi người chơi bấm 1 phím bất kỳ thì mới tắt, KHÔNG hiện chữ rác
                 remove("save.txt");
-                break;
+                return ;
             }
             thoi_gian_cu = clock();
             //======= kiem tra ======
@@ -335,18 +373,11 @@ int main()
         Sleep(1);
     }
  
-    GotoXY(0, 35);
-    return 0;
+    
 }
 
-// x= 10 ->100
-// y= 5 ->28
-/*
-góc phần tư thứ 1: (10,5)
-góc phần tư thứ 2: (100,5)
-góc phần tư thứ 3: (10,28)
-góc phần tư thứ 4: (100,28)
-*/
+
+
 void ve_tuong_tren()
 {
     int x = 11, y = 5;
@@ -570,34 +601,107 @@ bool kt_ran_an_qua(int xqua, int yqua, int x0, int y0)
     return false;
 }
 
-
-void SaveGame(int toadox[], int toadoy[], int &xqua, int &yqua, int &diem, int &tocdo, int &sl)
+void SaveGame(string ten_file, int toadox[], int toadoy[], int xqua, int yqua, int diem, int tocdo, int sl)
 {
     ofstream f;
-    f.open("save.txt");
+    f.open(ten_file.c_str()); // Mở file theo tên truyền vào
     f << diem << " " << tocdo << " " << sl << " " << xqua << " " << yqua << " "  << endl;
-
-    for(int i=0;i<sl;i++)
-    {
-        f << toadox[i] <<" " << toadoy[i]<<endl;
-    }
+    for(int i=0; i<sl; i++) f << toadox[i] << " " << toadoy[i] << endl;
     f.close();
-
 }
 
-bool TaiGame(int toadox[], int toadoy[], int &xqua, int &yqua, int &diem, int &tocdo, int &sl)
+bool TaiGame(string ten_file, int toadox[], int toadoy[], int &xqua, int &yqua, int &diem, int &tocdo, int &sl)
 {
     ifstream f;
-    f.open("save.txt");
-
+    f.open(ten_file.c_str());
     if(!f) return false;
-
-    f >> diem >> tocdo >> sl >> xqua >> yqua;
-
-    for(int i=0;i<sl;i++)
-    {
-        f >> toadox[i] >> toadoy[i];
-    }
+    f >> diem >> tocdo >> sl >> xqua >> yqua ;
+    for(int i=0; i<sl; i++) f >> toadox[i] >> toadoy[i];
     f.close();
     return true;
+}
+
+
+
+void ve_nut(int x,int y,char chu)
+{
+   
+    GotoXY(x,y); cout << char(218) << char(196) << char(196) << char(196) << char(191);
+    GotoXY(x, y + 1); cout << char(179) << " " << chu << " " <<char(179);     
+    GotoXY(x, y + 2); cout << char(192) << char(196) << char(196) << char(196) << char(217);
+}
+void ve_sang(int phim,int &sang)
+{
+	if(phim == 1)  //lên
+    {
+        TextColor(228);
+        GotoXY(116,7);
+        cout<<" W "; 
+        sang=1;
+        TextColor(7);
+    }
+    
+    if(phim == 0)  
+    {
+        TextColor(228);
+        GotoXY(116,11); 
+        cout<<" S ";
+        sang=1;
+        TextColor(7);
+    }
+    
+    if(phim == 2)  
+    {
+        TextColor(228);
+        GotoXY(111,11); 
+        cout<<" A ";
+        sang=1;
+        TextColor(7);
+    }
+    
+    if(phim == 3)  
+    {
+        TextColor(228);
+        GotoXY(121,11); 
+        cout<<" D ";
+        sang=1;
+        TextColor(7);
+    }
+        
+    
+}
+
+void ve_toi(int phim)
+{
+	if(phim == 1)  //lên
+    {
+        TextColor(7);
+        GotoXY(116,7);
+        cout<<" W ";   
+    }
+    
+    if(phim == 0)  
+    {
+        TextColor(7);
+        GotoXY(116,11); 
+        cout<<" S ";
+        TextColor(7);
+    }
+    
+    if(phim == 2)  
+    {
+        TextColor(7);
+        GotoXY(111,11); 
+        cout<<" A ";
+        
+    }
+    
+    if(phim == 3)  
+    {
+        TextColor(7);
+        GotoXY(121,11); 
+        cout<<" D ";
+    }
+        
+    
 }
