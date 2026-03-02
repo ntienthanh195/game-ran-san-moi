@@ -10,6 +10,13 @@
 int sl=7;
 using namespace std;
 
+// --- CẤU HÌNH BẢN ĐỒ ---
+#define TUONG_TRAI 10
+#define TUONG_PHAI 100
+#define TUONG_TREN 5
+#define TUONG_DUOI 28
+
+
 void ve_tuong_tren();
 void ve_tuong_duoi();
 void ve_tuong_phai();
@@ -26,8 +33,16 @@ bool kt_ran_an_qua(int xqua, int yqua, int x0, int y0);
 void SaveGame(string ten_file, int toadox[], int toadoy[], int xqua, int yqua, int diem, int tocdo, int sl);
 bool TaiGame(string ten_file, int toadox[], int toadoy[], int &xqua, int &yqua, int &diem, int &tocdo, int &sl);
 void ve_nut(int x,int y,char chu);
+void Ve_Nut();
 void ve_sang(int phim,int &sang);
 void ve_toi(int phim);
+void ran_di_chuyen(int &diem, int &tocdo, int &l, int &xqua, int &yqua, int toadox[], int toadoy[], string ten_file);
+void game_over(string ten_file); 
+void Tinh_Toa_Do_Moi(int &x, int &y, int check);
+void QuanLy_Den_Phim(int &phim_sang, clock_t &thoi_gian_tat_den);
+
+// Sửa kiểu trả về từ void thành char để "báo cáo" phím bấm
+char XuLy_Phim_Bam(int &check, vector<int> &huong_di);
 
 
 void CheDo_1_CoDien();    
@@ -130,7 +145,7 @@ int main()
           }
           case 2: 
           {
-            
+            CheDo_2_XuyenTuong();
             break;
           }
           case 3: 
@@ -154,165 +169,115 @@ int main()
 }
 
 
-
 void CheDo_1_CoDien()
 {
     int diem, tocdo, l, xqua, yqua;
-    int check=-1;
     int toadox[100], toadoy[100];
     int x, y;
 
-   while(true)
-   {
-      system("cls");
-      TextColor(11);
-      cout<<"\n1. Choi moi(New Game)";
-      cout<<"\n2. Tiep tuc(Continue)";
-      cout<<"\n0. Thoat(Exit)";
-      cout<<"\n\n\tLua chon cua ban: ";
-      char luachon=_getch();
-      if(luachon == '1')
-      {
-        sl=7;
-        diem =0;
-        tocdo=200;
-        check=-1;
-        khoi_tao_ran(toadox, toadoy);
-        tao_qua(xqua, yqua, toadox, toadoy);
-        break;
-      }
-      else if(luachon == '2')
-      {
-        if(TaiGame("savegame1.txt",toadox, toadoy, xqua, yqua, diem, tocdo, sl))
+    int check = -1;
+    vector<int> huong_di;
+    bool gameover = false;
+    
+    int sang = 0;
+    int phim_sang = -1;
+    clock_t thoi_gian_tat_den = 0;
+   
+    // ==========================================
+    // 1. MENU CHUẨN BỊ TRƯỚC KHI VÀO GAME
+    // ==========================================
+
+    while(true)
+    {
+        system("cls");
+        TextColor(11);
+        cout<<"\n1. Choi moi(New Game)";
+        cout<<"\n2. Tiep tuc(Continue)";
+        cout<<"\n0. Thoat(Exit)";
+        cout<<"\n\n\tLua chon cua ban: ";
+        char luachon=_getch();
+        if(luachon == '1')
         {
+            sl=7;
+            diem =0;
+            tocdo=200;
+            check=-1;
+            khoi_tao_ran(toadox, toadoy);
+            tao_qua(xqua, yqua, toadox, toadoy);
             break;
         }
-        else 
+        else if(luachon == '2')
         {
-            TextColor(12);
-            cout<<"\n\n\t =====KHONG TIM THAY FILE SAVE!=====";
-            Sleep(1000);
-            continue;
-        } 
-      }
-      else if(luachon == '0')
-      {
-        return ;
-      }
+            if(TaiGame("savegame1.txt",toadox, toadoy, xqua, yqua, diem, tocdo, sl))
+            {
+                break;
+            }
+            else 
+            {
+                TextColor(12);
+                cout<<"\n\n\t =====KHONG TIM THAY FILE SAVE!=====";
+                Sleep(1000);
+                continue;
+            } 
+        }
+        else if(luachon == '0')
+        {
+            return ;
+        }
+    }
 
-   }
-
-
+    // ==========================================
+    // 2. VẼ GIAO DIỆN BAN ĐẦU
+    // ==========================================
     
-    
-    bool gameover =false;
-    
-
-    
-    l = 1;
-    int sang=0;
-    
-    int phim_sang=-1;
-    clock_t thoi_gian_tat_den =0;
-
-
-    
-    // --- VÀO GAME ---
     system("cls");
     ve_tuong();
-    ve_nut(110,10,'A');
-    ve_nut(115,10,'S');
-    ve_nut(120,10,'D');
-    ve_nut(115,6,'W');
+    Ve_Nut();
     
-    // Vẽ lại rắn
     TextColor(11);
     ve_ran(toadox, toadoy);
-    
-    // Vẽ quả táo (vẽ lại vì system cls đã xóa)
+
+    // Vẽ quả táo
     int mau_qua = rand() % (15 - 9 + 1) + 9;
     TextColor(mau_qua);
     GotoXY(xqua, yqua); cout << "$";
     TextColor(7);
     
-    
     // Vẽ thông tin
     GotoXY(0, 0); cout << "Diem: " << diem;
-
     GotoXY(0, 2);  cout << "Nhan 'x' de Save & Exit";
 
-    
-
-    clock_t thoi_gian_cu = clock(); // Bấm giờ mốc thời gian bắt đầu
+    clock_t thoi_gian_cu = clock(); 
 
     x = toadox[0];
     y = toadoy[0];
     
-
-    vector<int> huong_di;
-
+    // ==========================================
+    // 3. VÒNG LẶP GAME CHÍNH (GAME LOOP)
+    // =========================================
     
-
-    
-    
-    while (gameover == false)
+    // BẮT ĐẦU VÒNG LẶP (Chỗ này lúc nãy bạn bị thiếu)
+    while (gameover == false) 
     {
-        
-
-
-        GotoXY(0,0);
-
-        // bảng điều khiển
-        if (_kbhit())
+        // A. Xử lý phím (Dùng chung)
+        char phim= XuLy_Phim_Bam(check, huong_di);
+        if(phim == 'x')
         {
-            char kitu = _getch();
-            if(kitu == 'x')
-            {
-                SaveGame("savegame1.txt",toadox, toadoy, xqua, yqua, diem, tocdo, sl);
-                system("cls");
-                GotoXY(50, 14); cout << "GAME SAVED!";
-                return ; // Thoát game
-            }
-            if (kitu == -32)
-            {
-                kitu = _getch();
-
-                int huong_tam=-1; 
-              
-                int huong_du_tinh= (huong_di.empty()==true) ? check : huong_di.back();
-                
-
-                if (kitu == 72 && huong_du_tinh != 0) //Muốn LÊN (1), kỵ XUỐNG (0)
-                    huong_tam = 1;
-                else if (kitu == 80 && huong_du_tinh != 1) // Muốn XUỐNG (0), kỵ LÊN (1)
-                    huong_tam = 0;
-                else if (kitu == 75 && huong_du_tinh != 3) // Muốn TRÁI (2), kỵ PHẢI (3)
-                    huong_tam = 2;
-                else if (kitu == 77 && huong_du_tinh != 2) // Muốn PHẢI (3), kỵ TRÁI (2)
-                    huong_tam = 3;
-
-                if(huong_tam != -1 && huong_di.size() <2 )
-                {
-                    huong_di.push_back(huong_tam);              
-                }
-            }
+            SaveGame("savegame1.txt", toadox, toadoy, xqua, yqua, diem, tocdo, sl);
+            system("cls");
+            GotoXY(50, 14); cout << "GAME SAVED!";
+            return; // Thoát hàm luôn
         }
 
-        if(phim_sang != -1)
-        {
-            if(clock() >= thoi_gian_tat_den)
-            {
-                ve_toi(phim_sang);
-                phim_sang=-1;
-            }
-        }
+        // B. Quản lý đèn (Dùng chung)
+        QuanLy_Den_Phim(phim_sang, thoi_gian_tat_den);
 
+        // C. Xử lý di chuyển theo tốc độ (nhịp game)
         if (clock() - thoi_gian_cu >= tocdo)
         {
-
             if(huong_di.empty() == false)
             {
-                check= huong_di.front();
+                check = huong_di.front();
                 huong_di.erase(huong_di.begin());
                 if (phim_sang != -1) ve_toi(phim_sang);
                 ve_sang(check, sang);
@@ -320,62 +285,192 @@ void CheDo_1_CoDien()
                 thoi_gian_tat_den = clock() + 150;
             }
 
-            
-                
-            
-           
-            if (check != -1)
-            {
-                if (check == 0)
-                    y++; // 0 la di xuong
-                else if (check == 1)
-                    y--; // 1 la di len
-                else if (check == 2)
-                    x--; // 2 cham vao bien phai - di qua trai
-                else if (check == 3)
-                    x++; // 3 cham vao ben trai - di qua phai (tuc la 100)
-            
-                xu_ly_ran(toadox, toadoy, x, y, xqua, yqua, diem, tocdo);
-            }
-            if (kt_ran_cham_tuong(toadox[0], toadoy[0]) == true || kt_ran_cham_duoi(toadox, toadoy) == true)
+            if (check != -1) Tinh_Toa_Do_Moi(x, y, check);
+
+            // KIỂM TRA LUẬT CHƠI
+            if (check != -1 && (kt_ran_cham_tuong(x, y) || kt_ran_cham_duoi(toadox, toadoy)))
             {
                 gameover = true;
-
-                // Bạn có thể thêm xử lý âm thanh hoặc thông báo ở đây cho gọn
-                // 1. In thông báo Game Over
-                GotoXY(50, 14);
-                cout << "GAME OVER!";
-
-                // 2. In hướng dẫn thoát
-                GotoXY(45, 15);
-                cout << "Nhan phim bat ky de quay lai MENU";
-
-                // 3. Đưa con trỏ ra chỗ khuất (để không nhấp nháy xấu màn hình)
-                GotoXY(0, 35);
-
-                // 4. Dùng lệnh này thay cho system("pause")
-                _getch(); // Đợi người chơi bấm 1 phím bất kỳ thì mới tắt, KHÔNG hiện chữ rác
-                remove("save.txt");
-                return ;
+                game_over("savegame1.txt");  
+                return;       
             }
-            thoi_gian_cu = clock();
-            //======= kiem tra ======
+            
+            if (!gameover && check != -1) 
+            {
+                xu_ly_ran(toadox, toadoy, x, y, xqua, yqua, diem, tocdo);
+                x = toadox[0];
+                y = toadoy[0];
+            }
 
             int mau = rand() % (15 - 9 + 1) + 9;
             TextColor(mau);
-            GotoXY(0, 0);
-            cout << "Diem: " << diem;
-            
+            GotoXY(0, 0); cout << "Diem: " << diem;
+            TextColor(7);
 
-            
+            thoi_gian_cu = clock(); 
         }
         
-        Sleep(1);
-    }
- 
-    
-}
+        Sleep(1); 
+    } // ĐÓNG VÒNG LẶP WHILE
 
+} 
+
+
+
+void CheDo_2_XuyenTuong()
+{
+    int diem, tocdo, l, xqua, yqua;
+    int toadox[100], toadoy[100];
+    int x, y;
+
+    int check = -1;
+    vector<int> huong_di;
+    bool gameover = false;
+    
+    int sang = 0;
+    int phim_sang = -1;
+    clock_t thoi_gian_tat_den = 0;
+   
+    // ==========================================
+    // 1. MENU CHUẨN BỊ TRƯỚC KHI VÀO GAME
+    // ==========================================
+
+    while(true)
+    {
+        system("cls");
+        TextColor(11);
+        cout<<"\n1. Choi moi(New Game)";
+        cout<<"\n2. Tiep tuc(Continue)";
+        cout<<"\n0. Thoat(Exit)";
+        cout<<"\n\n\tLua chon cua ban: ";
+        char luachon=_getch();
+        if(luachon == '1')
+        {
+            sl=7;
+            diem =0;
+            tocdo=200;
+            check=-1;
+            khoi_tao_ran(toadox, toadoy);
+            tao_qua(xqua, yqua, toadox, toadoy);
+            break;
+        }
+        else if(luachon == '2')
+        {
+            if(TaiGame("savegame2.txt",toadox, toadoy, xqua, yqua, diem, tocdo, sl))
+            {
+                break;
+            }
+            else 
+            {
+                TextColor(12);
+                cout<<"\n\n\t =====KHONG TIM THAY FILE SAVE!=====";
+                Sleep(1000);
+                continue;
+            } 
+        }
+        else if(luachon == '0')
+        {
+            return ;
+        }
+    }
+
+    // ==========================================
+    // 2. VẼ GIAO DIỆN BAN ĐẦU
+    // ==========================================
+    
+    system("cls");
+    ve_tuong();
+    Ve_Nut();
+    
+    TextColor(11);
+    ve_ran(toadox, toadoy);
+
+    // Vẽ quả táo
+    int mau_qua = rand() % (15 - 9 + 1) + 9;
+    TextColor(mau_qua);
+    GotoXY(xqua, yqua); cout << "$";
+    TextColor(7);
+    
+    // Vẽ thông tin
+    GotoXY(0, 0); cout << "Diem: " << diem;
+    GotoXY(0, 2);  cout << "Nhan 'x' de Save & Exit";
+
+    clock_t thoi_gian_cu = clock(); 
+
+    x = toadox[0];
+    y = toadoy[0];
+    
+    // ==========================================
+    // 3. VÒNG LẶP GAME CHÍNH (GAME LOOP)
+    // =========================================
+    
+    // BẮT ĐẦU VÒNG LẶP (Chỗ này lúc nãy bạn bị thiếu)
+    while (gameover == false) 
+    {
+        // A. Xử lý phím (Dùng chung)
+        char phim= XuLy_Phim_Bam(check, huong_di);
+        if(phim == 'x')
+        {
+            SaveGame("savegame2.txt", toadox, toadoy, xqua, yqua, diem, tocdo, sl);
+            system("cls");
+            GotoXY(50, 14); cout << "GAME SAVED!";
+            return; // Thoát hàm luôn
+        }
+
+        // B. Quản lý đèn (Dùng chung)
+        QuanLy_Den_Phim(phim_sang, thoi_gian_tat_den);
+
+        // C. Xử lý di chuyển theo tốc độ (nhịp game)
+        if (clock() - thoi_gian_cu >= tocdo)
+        {
+            if(huong_di.empty() == false)
+            {
+                check = huong_di.front();
+                huong_di.erase(huong_di.begin());
+                if (phim_sang != -1) ve_toi(phim_sang);
+                ve_sang(check, sang);
+                phim_sang = check;
+                thoi_gian_tat_den = clock() + 150;
+            }
+
+            if (check != -1) Tinh_Toa_Do_Moi(x, y, check);
+
+            if (x <= TUONG_TRAI) x = TUONG_PHAI - 1;       // Đụng tường trái -> Xuyên qua phải
+            else if (x >= TUONG_PHAI) x = TUONG_TRAI + 1;  // Đụng tường phải -> Xuyên qua trái
+            else if (y <= TUONG_TREN) y = TUONG_DUOI - 1;  // Đụng trần nhà -> Rớt xuống đáy
+            else if (y >= TUONG_DUOI) y = TUONG_TREN + 1;  // Đụng đáy -> Trồi lên trần nhà
+
+
+            // KIỂM TRA LUẬT CHƠI 2
+
+            if (check != -1 && ( kt_ran_cham_duoi(toadox, toadoy)))
+            {
+                gameover = true;
+                game_over("savegame2.txt");  
+                return;       
+            }
+            
+
+
+            if (!gameover && check != -1) 
+            {
+                xu_ly_ran(toadox, toadoy, x, y, xqua, yqua, diem, tocdo);
+                x = toadox[0];
+                y = toadoy[0];
+            }
+
+            int mau = rand() % (15 - 9 + 1) + 9;
+            TextColor(mau);
+            GotoXY(0, 0); cout << "Diem: " << diem;
+            TextColor(7);
+
+            thoi_gian_cu = clock(); 
+        }
+        
+        Sleep(1); 
+    } 
+
+} 
 
 
 void ve_tuong_tren()
@@ -442,6 +537,14 @@ void ve_tuong()
     ve_tuong_duoi();
     ve_tuong_phai();
     ve_tuong_trai();
+}
+
+void Ve_Nut()
+{
+    ve_nut(110,10,'A');
+    ve_nut(115,10,'S');
+    ve_nut(120,10,'D');
+    ve_nut(115,6,'W');
 }
 
 void khoi_tao_ran(int toadox[], int toadoy[])
@@ -705,3 +808,71 @@ void ve_toi(int phim)
         
     
 }
+
+
+
+// Hàm này chỉ lo việc hiển thị thông báo
+void game_over(string ten_file) 
+{
+    GotoXY(50, 14); 
+    TextColor(12); cout << "GAME OVER!"; 
+    TextColor(7);
+    GotoXY(45, 15); cout << "Nhan phim bat ky de quay lai MENU";
+    
+    remove(ten_file.c_str());
+    
+    _getch(); 
+}
+
+
+void Tinh_Toa_Do_Moi(int &x, int &y, int check)
+{
+    // check là hướng đi hiện tại: 0-Xuống, 1-Lên, 2-Trái, 3-Phải
+    switch (check) {
+        case 0: y++; break;
+        case 1: y--; break;
+        case 2: x--; break;
+        case 3: x++; break;
+    }
+}
+
+
+void QuanLy_Den_Phim(int &phim_sang, clock_t &thoi_gian_tat_den)
+{
+    // Kiểm tra nếu đang có đèn sáng và đã hết giờ -> Tắt đi
+    if (phim_sang != -1 && clock() >= thoi_gian_tat_den)
+    {
+        ve_toi(phim_sang);
+        phim_sang = -1;
+    }
+}
+
+char XuLy_Phim_Bam(int &check, vector<int> &huong_di)
+{
+    if (_kbhit())
+    {
+        char kitu = _getch();
+        // Nếu bắt được 'x' thì trả về ngay để hàm main xử lý
+        if (kitu == 'x') return 'x'; 
+
+        if (kitu == -32) // Phím mũi tên
+        {
+            kitu = _getch();
+            int huong_tam = -1;
+            int huong_du_tinh = (huong_di.empty()) ? check : huong_di.back();
+
+            if (kitu == 72 && huong_du_tinh != 0) huong_tam = 1;      
+            else if (kitu == 80 && huong_du_tinh != 1) huong_tam = 0; 
+            else if (kitu == 75 && huong_du_tinh != 3) huong_tam = 2; 
+            else if (kitu == 77 && huong_du_tinh != 2) huong_tam = 3; 
+
+            if (huong_tam != -1 && huong_di.size() < 2)
+                huong_di.push_back(huong_tam);
+        }
+    }
+    return 0; // Trả về 0 nếu không có gì đặc biệt
+}
+
+
+
+
