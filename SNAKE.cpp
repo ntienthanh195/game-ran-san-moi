@@ -1,5 +1,5 @@
 #include <iostream>
-#include "SNAKE.h"
+
 #include <conio.h>
 #include <string>
 #include <ctime>
@@ -9,6 +9,32 @@
 
 int sl=7;
 using namespace std;
+
+void GotoXY(int x, int y)
+{
+    COORD coord;
+    coord.X = x;
+    coord.Y = y;
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+}
+
+// Hàm d?i màu ch?
+// Giúp r?n có màu s?c d?p hon
+void TextColor(int color)
+{
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
+}
+
+// Hàm ?n/hi?n con tr? chu?t nh?p nháy
+// Khi choi game nên ?n di cho d?p (truy?n vào 0 d? ?n, 1 d? hi?n)
+void ShowCur(bool CursorVisibility)
+{
+    HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_CURSOR_INFO cursor = { 1, CursorVisibility };
+    SetConsoleCursorInfo(handle, &cursor);
+}
+
+
 
 // --- CẤU HÌNH BẢN ĐỒ ---
 #define TUONG_TRAI 10
@@ -125,48 +151,6 @@ int HienThiMenu()
      
 
 
-
-
-int main()
-{
-    SetConsoleOutputCP(437);
-    srand(time(NULL));
-    ShowCur(0);
-
-    while(true)
-    {
-        int luachon = HienThiMenu();
-        switch(luachon)
-        {
-          case 1: 
-          {
-            CheDo_1_CoDien();
-            break;
-          }
-          case 2: 
-          {
-            CheDo_2_XuyenTuong();
-            break;
-          }
-          case 3: 
-          {
-            
-            break;
-          }
-          case 4: 
-          {
-            
-            break;
-          }
-          case 0: 
-          {
-            return 0;
-          }
-
-
-          }
-    }
-}
 
 
 void CheDo_1_CoDien()

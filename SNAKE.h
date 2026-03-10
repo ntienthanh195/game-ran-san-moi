@@ -3,50 +3,89 @@
 #include <stdio.h>
 #include <conio.h>
 #include <ctime> 
+#include<vector>
 #include <windows.h> // Thu vi?n quan tr?ng nh?t d? di?u khi?n Console
+
 
 #define KEY_NONE -1
 
-// Hàm d?ch chuy?n con tr? d?n t?a d? (x, y)
-// Ðây là hàm quan tr?ng nh?t d? v? R?n và M?i
-void GotoXY(int x, int y)
-{
-    COORD coord;
-    coord.X = x;
-    coord.Y = y;
-    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
-}
+void GotoXY(int x, int y);
 
-// Hàm d?i màu ch?
-// Giúp r?n có màu s?c d?p hon
-void TextColor(int color)
-{
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
-}
+void TextColor(int color);
 
-// Hàm ?n/hi?n con tr? chu?t nh?p nháy
-// Khi choi game nên ?n di cho d?p (truy?n vào 0 d? ?n, 1 d? hi?n)
-void ShowCur(bool CursorVisibility)
-{
-    HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
-    CONSOLE_CURSOR_INFO cursor = { 1, CursorVisibility };
-    SetConsoleCursorInfo(handle, &cursor);
-}
+void ShowCur(bool CursorVisibility);
 
-// Hàm l?y t?a d? X hi?n t?i c?a con tr?
-int WhereX()
-{
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi))
-        return csbi.dwCursorPosition.X;
-    return -1;
-}
+int HienThiMenu();
+void ve_tuong();
+void ve_tuong_tren();
+void ve_tuong_duoi();
+void ve_tuong_trai();
+void ve_tuong_phai();
+void Ve_Nut(); 
+void ve_nut(int x, int y, char chu);
+void ve_sang(int phim, int &sang);
+void ve_toi(int phim);
+void khoi_tao_ran(int toadox[], int toadoy[]);
+void ve_ran(int toadox[], int toadoy[]);
+void tao_qua(int &xqua, int &yqua, int toadox[], int toadoy[]);
+void xu_ly_ran(int toadox[], int toadoy[], int &xqua, int &yqua, int &sl, int x, int y, bool &AnQua);
+void Tinh_Toa_Do_Moi(int &x, int &y, int check);
+char XuLy_Phim_Bam(int &check, vector<int> &huong_di);
+void QuanLy_Den_Phim(int &phim_sang, clock_t &thoi_gian_tat_den);
+void game_over(string ten_file);
+void ran_di_chuyen(int toadox[], int toadoy[], int x, int y, int sl);
+bool kt_ran_cham_tuong(int x0, int y0);
+bool kt_ran_cham_duoi(int toadox[], int toadoy[], int sl);
+bool kt_ran_de_qua(int xqua, int yqua, int toadox[], int toadoy[], int sl);
+bool kt_ran_an_qua(int x0, int y0, int xqua, int yqua);
 
-// Hàm l?y t?a d? Y hi?n t?i c?a con tr?
-int WhereY()
+void SaveGame(int toadox[], int toadoy[], int sl, int diem, int toc_do, string ten_file);
+bool TaiGame(int toadox[], int toadoy[], int &sl, int &diem, int &toc_do, string ten_file);
+
+void CheDo_1_CoDien();
+void CheDo_2_XuyenTuong();
+void CheDo_3_VatCan();
+void CheDo_4_DauTruong();
+
+
+
+int main()
 {
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi))
-        return csbi.dwCursorPosition.Y;
-    return -1;
+    SetConsoleOutputCP(437);
+    srand(time(NULL));
+    ShowCur(0);
+
+    while(true)
+    {
+        int luachon = HienThiMenu();
+        switch(luachon)
+        {
+          case 1: 
+          {
+            CheDo_1_CoDien();
+            break;
+          }
+          case 2: 
+          {
+            CheDo_2_XuyenTuong();
+            break;
+          }
+          case 3: 
+          {
+            
+            break;
+          }
+          case 4: 
+          {
+            
+            break;
+          }
+          case 0: 
+          {
+            return 0;
+          }
+
+
+          }
+    }
 }
